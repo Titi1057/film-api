@@ -26,12 +26,12 @@ import os                                   # Interaction avec le système
 # Ce bloc est essentiel pour que Streamlit Cloud valide le déploiement.
 st.set_page_config(page_title="TrendMovie API Monitor", page_icon="🎬")
 
-st.title("🚀 Serveur TrendMovie API - Statut : En ligne")
+st.title(" Serveur TrendMovie API - Statut : En ligne")
 st.success("L'infrastructure Cloud a validé le déploiement du service Backend.")
 st.write("Le moteur **FastAPI** tourne en arrière-plan pour gérer les requêtes CRUD.")
 
 # Lien cliquable vers la documentation
-st.info("💡 **Accès Développeur** : La documentation interactive Swagger est disponible ici : [/docs](/docs)")
+st.info("**Accès Développeur** : La documentation interactive Swagger est disponible ici : [/docs](/docs)")
 
 # --- 2. MODÈLE DE DONNÉES (Pydantic) ---
 # Définit la structure d'un objet "Film" pour la validation automatique.
