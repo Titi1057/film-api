@@ -1,198 +1,229 @@
-# ****************************************************************************
-#  # Nom ......... : fast_api.py 
-# Rôle ........ : Développement d'une API RESTful collaborative pour la 
-#                 gestion d'un catalogue cinématographique (Exercice 3.1).
-#                 Permet la consultation (GET), l'ajout (POST) et la mise à 
-#                 jour (PATCH/PUT) en temps réel d'une base de données de films.
-# Auteur ...... : Tchenkaeva Iman
-# Version ..... : V1.2 - Version finale optimisée pour le rendu 
-# Environnement : VS Code - Python 3.12+ 
-# Librairies .. : FastAPI, Uvicorn, Pydantic (modélisation de données)""
-# **************************************************************************** ```
+# **************************************************************************** 
 
-# ****************************************************************************
-# NOM DU PROJET : TrendMovieAPI 2026
-# RÔLE ......... : Développement et Déploiement d'une API RESTful Hybride.
-# VERSION ...... : V3.0 - Stable Cloud
-# ****************************************************************************
+#  # Nom ......... : fast_api.py  
 
-from fastapi import FastAPI, HTTPException # Cœur de l'API et gestion des erreurs
-from pydantic import BaseModel # Validation des données (Schéma)
-from typing import List # Typage des listes pour les réponses
-import streamlit as st # Interface de monitoring Cloud
-import os # Interaction avec le système
-# --- 1. CONFIGURATION DE L'INTERFACE DE MONITORING (FRONTEND) ---
-st.set_page_config(page_title="TrendMovie API Monitor", page_icon="🎬")
-st.title(" Serveur TrendMovie API - Statut : En ligne")
-st.success("L'infrastructure Cloud a validé le déploiement du service Backend.")
-st.write("Le moteur **FastAPI** tourne en arrière-plan pour gérer les requêtes CRUD.")
-st.info("**Accès Développeur** : La documentation interactive Swagger est disponible ici : [/docs](/docs)")
-# --- 2. MODÈLE DE DONNÉES (Pydantic) ---
-class Movie(BaseModel):
-    id: int # Identifiant unique
-    titre: str # Nom du film
-    realisateur: str # Nom du réalisateur
-    genre: str # Catégorie
-    score_tendance: int # Score sur 100
-    entrees_estimées: int # Volume de spectateurs
-    en_salle: bool # État de sortie
-# --- 3. INITIALISATION DU MOTEUR API ---
-app = FastAPI(title="TrendMovie API 2026")
+# Rôle ........ : Développement d'une API RESTful collaborative pour la  
 
-class Movie(BaseModel):
+#                 gestion d'un catalogue cinématographique (Exercice 3.1). 
 
-    id: int                 # Identifiant unique
+#                 Permet la consultation (GET), l'ajout (POST) et la mise à  
 
-    titre: str              # Nom du film
+#                 jour (PATCH/PUT) en temps réel d'une base de données de films. 
 
-    realisateur: str        # Nom du réalisateur
+# Auteur ...... : Tchenkaeva Iman 
 
-    genre: str              # Catégorie
+# Version ..... : V1.2 - Version finale optimisée pour le rendu  
 
-    score_tendance: int     # Score sur 100
+# Environnement : VS Code - Python 3.12+  
 
-    entrees_estimées: int   # Volume de spectateurs
+# Librairies .. : FastAPI, Uvicorn, Pydantic (modélisation de données) 
 
-    en_salle: bool          # État de sortie
+# **************************************************************************** ``` 
 
+ 
 
+ 
 
-# Initialisation de l'application FastAPI
+from fastapi import FastAPI, HTTPException  # FastAPI pour l'API, HTTPException pour les erreurs (404, etc.) 
 
-app = FastAPI(title="TrendMovie API 2026")
+from pydantic import BaseModel              # Pour définir le schéma des données (Data Validation) 
 
+from typing import List                     # Pour définir des listes typées dans les réponses 
 
+ 
 
-# --- 3. BASE DE DONNÉES SIMULÉE (In-Memory) ---
+# 1. --- MODÈLE DE DONNÉES (Pydantic) --- 
 
-db_movies = [
+# Ce modèle définit la structure d'un objet "Film".  
 
-    {"id": 1, "titre": "Avengers: Doomsday", "realisateur": "Russo Brothers", "genre": "Action", "score_tendance": 98, "entrees_estimées": 5000000, "en_salle": False},
+# FastAPI l'utilise pour vérifier que les données envoyées par les utilisateurs sont correctes. 
 
-    {"id": 2, "titre": "Dune: Part Three", "realisateur": "Denis Villeneuve", "genre": "SF", "score_tendance": 95, "entrees_estimées": 3200000, "en_salle": False},
+class Movie(BaseModel): 
 
-    {"id": 3, "titre": "Marsupilami", "realisateur": "Philippe Lacheau", "genre": "Comédie", "score_tendance": 88, "entrees_estimées": 3825975, "en_salle": True},
+    id: int                 # Identifiant unique (ex: 1) 
 
-    {"id": 4, "titre": "Mickey 17", "realisateur": "Bong Joon-ho", "genre": "SF", "score_tendance": 82, "entrees_estimées": 1200000, "en_salle": True},
+    titre: str              # Chaîne de caractères 
 
-    {"id": 5, "titre": "Avatar: Fire and Ash", "realisateur": "James Cameron", "genre": "Aventure", "score_tendance": 97, "entrees_estimées": 0, "en_salle": False},
+    realisateur: str        # Chaîne de caractères 
 
-    {"id": 6, "titre": "Beyond the Spider-Verse", "realisateur": "Joaquim Dos Santos", "genre": "Animation", "score_tendance": 94, "entrees_estimées": 0, "en_salle": False},
+    genre: str              # Chaîne de caractères 
 
-    {"id": 7, "titre": "The Batman Part II", "realisateur": "Matt Reeves", "genre": "Polar", "score_tendance": 91, "entrees_estimées": 0, "en_salle": False},
+    score_tendance: int     # Entier (utilisé pour le tri de popularité) 
 
-    {"id": 8, "titre": "L'IA qui m'aimait", "realisateur": "Cédric Klapisch", "genre": "Romance", "score_tendance": 65, "entrees_estimées": 450000, "en_salle": True},
+    entrees_estimées: int   # Nombre de spectateurs prévus 
 
-    {"id": 9, "titre": "Super-Soldat 2026", "realisateur": "Michael Bay", "genre": "Action", "score_tendance": 70, "entrees_estimées": 800000, "en_salle": True},
+    en_salle: bool          # Booléen (True si le film est déjà sorti) 
 
-    {"id": 10, "titre": "Toy Story 5", "realisateur": "Andrew Stanton", "genre": "Animation", "score_tendance": 89, "entrees_estimées": 0, "en_salle": False},
+ 
 
-    {"id": 11, "titre": "Gladiator III", "realisateur": "Ridley Scott", "genre": "Historique", "score_tendance": 78, "entrees_estimées": 0, "en_salle": False},
+# Initialisation de l'application FastAPI 
 
-    {"id": 12, "titre": "Star Wars: New Order", "realisateur": "Sharmeen Obaid-Chinoy", "genre": "SF", "score_tendance": 75, "entrees_estimées": 0, "en_salle": False},
+# C'est l'objet "app" qui recevra toutes les requêtes HTTP. 
 
-    {"id": 13, "titre": "Shrek 5", "realisateur": "Walt Dohrn", "genre": "Animation", "score_tendance": 93, "entrees_estimées": 0, "en_salle": False},
+app = FastAPI(title="TrendMovieAPI 2026") 
 
-    {"id": 14, "titre": "Inception 2", "realisateur": "Christopher Nolan", "genre": "Thriller", "score_tendance": 85, "entrees_estimées": 0, "en_salle": False},
+ 
 
-    {"id": 15, "titre": "Zootopie 2", "realisateur": "Jared Bush", "genre": "Animation", "score_tendance": 87, "entrees_estimées": 0, "en_salle": False},
+# 2. --- BASE DE DONNÉES SIMULÉE --- 
 
-    {"id": 16, "titre": "Fast & Furious 12", "realisateur": "Justin Lin", "genre": "Action", "score_tendance": 60, "entrees_estimées": 1500000, "en_salle": True},
+# Utilisation d'une liste Python (In-Memory Storage) pour stocker nos 20 films. 
 
-    {"id": 17, "titre": "The Legend of Zelda", "realisateur": "Wes Ball", "genre": "Fantasy", "score_tendance": 96, "entrees_estimées": 0, "en_salle": False},
+# Conformément à la consigne : "un jeu de données à consulter et partager". 
 
-    {"id": 18, "titre": "Metroid Prime", "realisateur": "Brie Larson", "genre": "SF", "score_tendance": 84, "entrees_estimées": 0, "en_salle": False},
+db_movies = [ 
 
-    {"id": 19, "titre": "Sherlock Holmes 3", "realisateur": "Dexter Fletcher", "genre": "Mystère", "score_tendance": 79, "entrees_estimées": 0, "en_salle": False},
+    {"id": 1, "titre": "Avengers: Doomsday", "realisateur": "Russo Brothers", "genre": "Action", "score_tendance": 98, "entrees_estimées": 5000000, "en_salle": False}, 
 
-    {"id": 20, "titre": "Blade", "realisateur": "Yann Demange", "genre": "Horreur", "score_tendance": 81, "entrees_estimées": 0, "en_salle": False}
+    {"id": 2, "titre": "Dune: Part Three", "realisateur": "Denis Villeneuve", "genre": "SF", "score_tendance": 95, "entrees_estimées": 3200000, "en_salle": False}, 
 
-]
+    {"id": 3, "titre": "Marsupilami", "realisateur": "Philippe Lacheau", "genre": "Comédie", "score_tendance": 88, "entrees_estimées": 3825975, "en_salle": True}, 
 
+    {"id": 4, "titre": "Mickey 17", "realisateur": "Bong Joon-ho", "genre": "SF", "score_tendance": 82, "entrees_estimées": 1200000, "en_salle": True}, 
 
+    {"id": 5, "titre": "Avatar: Fire and Ash", "realisateur": "James Cameron", "genre": "Aventure", "score_tendance": 97, "entrees_estimées": 0, "en_salle": False}, 
 
-# --- 4. ROUTES DE L'API (CRUD) ---
+    {"id": 6, "titre": "Beyond the Spider-Verse", "realisateur": "Joaquim Dos Santos", "genre": "Animation", "score_tendance": 94, "entrees_estimées": 0, "en_salle": False}, 
 
+    {"id": 7, "titre": "The Batman Part II", "realisateur": "Matt Reeves", "genre": "Polar", "score_tendance": 91, "entrees_estimées": 0, "en_salle": False}, 
 
+    {"id": 8, "titre": "L'IA qui m'aimait", "realisateur": "Cédric Klapisch", "genre": "Romance", "score_tendance": 65, "entrees_estimées": 450000, "en_salle": True}, 
 
-@app.get("/")
+    {"id": 9, "titre": "Super-Soldat 2026", "realisateur": "Michael Bay", "genre": "Action", "score_tendance": 70, "entrees_estimées": 800000, "en_salle": True}, 
 
-async def root():
+    {"id": 10, "titre": "Toy Story 5", "realisateur": "Andrew Stanton", "genre": "Animation", "score_tendance": 89, "entrees_estimées": 0, "en_salle": False}, 
 
-    """Accueil de l'API."""
+    {"id": 11, "titre": "Gladiator III", "realisateur": "Ridley Scott", "genre": "Historique", "score_tendance": 78, "entrees_estimées": 0, "en_salle": False}, 
 
-    return {"message": "Bienvenue sur ma Base de Données Cinématographique 2026"}
+    {"id": 12, "titre": "Star Wars: New Order", "realisateur": "Sharmeen Obaid-Chinoy", "genre": "SF", "score_tendance": 75, "entrees_estimées": 0, "en_salle": False}, 
 
+    {"id": 13, "titre": "Shrek 5", "realisateur": "Walt Dohrn", "genre": "Animation", "score_tendance": 93, "entrees_estimées": 0, "en_salle": False}, 
 
+    {"id": 14, "titre": "Inception 2", "realisateur": "Christopher Nolan", "genre": "Thriller", "score_tendance": 85, "entrees_estimées": 0, "en_salle": False}, 
 
-@app.get("/movies", response_model=List[Movie])
+    {"id": 15, "titre": "Zootopie 2", "realisateur": "Jared Bush", "genre": "Animation", "score_tendance": 87, "entrees_estimées": 0, "en_salle": False}, 
 
-async def get_movies():
+    {"id": 16, "titre": "Fast & Furious 12", "realisateur": "Justin Lin", "genre": "Action", "score_tendance": 60, "entrees_estimées": 1500000, "en_salle": True}, 
 
-    """READ : Renvoie la liste complète des films."""
+    {"id": 17, "titre": "The Legend of Zelda", "realisateur": "Wes Ball", "genre": "Fantasy", "score_tendance": 96, "entrees_estimées": 0, "en_salle": False}, 
 
-    return db_movies
+    {"id": 18, "titre": "Metroid Prime", "realisateur": "Brie Larson", "genre": "SF", "score_tendance": 84, "entrees_estimées": 0, "en_salle": False}, 
 
+    {"id": 19, "titre": "Sherlock Holmes 3", "realisateur": "Dexter Fletcher", "genre": "Mystère", "score_tendance": 79, "entrees_estimées": 0, "en_salle": False}, 
 
+    {"id": 20, "titre": "Blade", "realisateur": "Yann Demange", "genre": "Horreur", "score_tendance": 81, "entrees_estimées": 0, "en_salle": False} 
 
-@app.get("/movies/{movie_id}")
+] 
 
-async def get_movie_by_id(movie_id: int):
+ 
 
-    """READ : Recherche par ID."""
+# --- 3. ROUTES DE L'API (Méthodes HTTP / CRUD) --- 
 
-    for movie in db_movies:
+ 
 
-        if movie["id"] == movie_id:
+# Route racine : Message de bienvenue 
 
-            return movie
+@app.get("/") 
 
-    raise HTTPException(status_code=404, detail="Film non trouvé")
+async def root(): 
 
+    """Point d'entrée principal de l'API.""" 
 
+    return {"message": "Bienvenue sur ma Base de Données Cinématographique 2026"} 
 
-@app.post("/movies")
+ 
 
-async def post_movie(movie: Movie):
+# Opération READ (Tout lire) 
 
-    """CREATE : Ajout collaboratif d'un nouveau film."""
+# Équivalent de @app.get("/Artistes") du squelette 3.6 
 
-    db_movies.append(movie.dict())
+@app.get("/movies") 
 
-    return movie
+async def get_movies(): 
 
+    """Renvoie la liste complète des films partagés.""" 
 
+    return db_movies 
 
-@app.put("/movies/{movie_id}")
+ 
 
-async def update_movie(movie_id: int, movie_update: Movie):
+# Opération READ (Lire un élément spécifique) 
 
-    """UPDATE : Mise à jour des informations."""
+# Utilise un paramètre de chemin {movie_id} 
 
-    for index, movie in enumerate(db_movies):
+@app.get("/movies/{movie_id}") 
 
-        if movie["id"] == movie_id:
+async def get_movie_by_id(movie_id: int): 
 
-            db_movies[index] = movie_update.dict()
+    """Recherche un film par son ID. Renvoie une erreur 404 si non trouvé.""" 
 
-            return movie_update
+    for movie in db_movies: 
 
-    raise HTTPException(status_code=404, detail="ID introuvable")
+        if movie["id"] == movie_id: 
 
+            return movie 
 
+    # Si la boucle finit sans trouver l'ID, on lève une exception 
 
-@app.delete("/movies/{movie_id}")
+    raise HTTPException(status_code=404, detail=f"Aucun film avec l'identifiant {movie_id} trouvé") 
 
-async def delete_movie(movie_id: int):
+ 
 
-    """DELETE : Suppression d'une entrée."""
+# Opération CREATE (Ajouter un film) 
 
-    for index, movie in enumerate(db_movies):
+# Cette route permet l'aspect COLLABORATIF : n'importe qui peut enrichir la base. 
 
-        if movie["id"] == movie_id:
+@app.post("/movies") 
 
-            db_movies.pop(index)
+async def post_movie(movie: Movie): 
 
-            return {"OK": True, "message": "Film supprimé"}
+    """Ajoute un nouveau film à la base de données commune.""" 
 
-    raise HTTPException(status_code=404, detail="ID introuvable")
+    db_movies.append(movie.dict()) # On transforme l'objet Pydantic en dictionnaire pour le stockage 
+
+    return movie 
+
+ 
+
+# Opération UPDATE (Mettre à jour un film) 
+
+# Équivalent de @app.put dans le cours pour modifier un enregistrement existant. 
+
+@app.put("/movies/{movie_id}") 
+
+async def update_movie(movie_id: int, movie_update: Movie): 
+
+    """Met à jour les informations d'un film existant via son ID.""" 
+
+    for index, movie in enumerate(db_movies): 
+
+        if movie["id"] == movie_id: 
+
+            # Remplacement de l'ancien dictionnaire par le nouveau 
+
+            db_movies[index] = movie_update.dict() 
+
+            return movie_update 
+
+    raise HTTPException(status_code=404, detail=f"Aucun film avec l'identifiant {movie_id} trouvé") 
+
+ 
+
+# Opération DELETE (Supprimer un film) 
+
+# Indispensable pour le cycle CRUD complet. 
+
+@app.delete("/movies/{movie_id}") 
+
+async def delete_movie(movie_id: int): 
+
+    """Supprime un film de la base partagée.""" 
+
+    for index, movie in enumerate(db_movies): 
+
+        if movie["id"] == movie_id: 
+
+            db_movies.pop(index) # Supprime l'élément à l'index trouvé 
+
+            return {"OK": True} # Confirmation de suppression 
+
+    raise HTTPException(status_code=404, detail=f"Aucun film avec l'identifiant {movie_id} n'existe") 
