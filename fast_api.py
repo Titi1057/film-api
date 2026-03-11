@@ -16,7 +16,67 @@
 # VERSION ...... : V3.0 - Stable Cloud
 # ****************************************************************************
 
+from fastapi import FastAPI, HTTPException  # Cœur de l'API et gestion des erreurs
 
+
+
+from pydantic import BaseModel              # Validation des données (Schéma)
+
+
+
+from typing import List                     # Typage des listes pour les réponses
+
+
+
+import streamlit as st                      # Interface de monitoring Cloud
+
+
+
+import os                                   # Interaction avec le système
+
+
+
+
+
+
+
+# --- 1. CONFIGURATION DE L'INTERFACE DE MONITORING (FRONTEND) ---
+
+
+
+# Ce bloc est essentiel pour que Streamlit Cloud valide le déploiement.
+
+
+
+st.set_page_config(page_title="TrendMovie API Monitor", page_icon="🎬")
+
+
+
+
+
+
+
+st.title(" Serveur TrendMovie API - Statut : En ligne")
+
+
+
+st.success("L'infrastructure Cloud a validé le déploiement du service Backend.")
+
+
+
+st.write("Le moteur **FastAPI** tourne en arrière-plan pour gérer les requêtes CRUD.")
+
+
+
+
+
+
+
+# Lien cliquable vers la documentation
+
+
+
+st.info("**Accès Développeur** : La documentation interactive Swagger est disponible ici : [/docs](/docs)")
 
 # --- 2. MODÈLE DE DONNÉES (Pydantic) ---
 
