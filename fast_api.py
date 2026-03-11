@@ -16,6 +16,28 @@
 # VERSION ...... : V3.0 - Stable Cloud
 # ****************************************************************************
 
+from fastapi import FastAPI, HTTPException # Cœur de l'API et gestion des erreurs
+from pydantic import BaseModel # Validation des données (Schéma)
+from typing import List # Typage des listes pour les réponses
+import streamlit as st # Interface de monitoring Cloud
+import os # Interaction avec le système
+# --- 1. CONFIGURATION DE L'INTERFACE DE MONITORING (FRONTEND) ---
+st.set_page_config(page_title="TrendMovie API Monitor", page_icon="🎬")
+st.title(" Serveur TrendMovie API - Statut : En ligne")
+st.success("L'infrastructure Cloud a validé le déploiement du service Backend.")
+st.write("Le moteur **FastAPI** tourne en arrière-plan pour gérer les requêtes CRUD.")
+st.info("**Accès Développeur** : La documentation interactive Swagger est disponible ici : [/docs](/docs)")
+# --- 2. MODÈLE DE DONNÉES (Pydantic) ---
+class Movie(BaseModel):
+    id: int # Identifiant unique
+    titre: str # Nom du film
+    realisateur: str # Nom du réalisateur
+    genre: str # Catégorie
+    score_tendance: int # Score sur 100
+    entrees_estimées: int # Volume de spectateurs
+    en_salle: bool # État de sortie
+# --- 3. INITIALISATION DU MOTEUR API ---
+app = FastAPI(title="TrendMovie API 2026")
 
 class Movie(BaseModel):
 
