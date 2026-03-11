@@ -10,23 +10,21 @@
 # Librairies .. : FastAPI, Uvicorn, Pydantic (modélisation de données)""
 # **************************************************************************** ```
 
+from fastapi import FastAPI, HTTPException  # Cœur de l'API et gestion des erreurs
+from pydantic import BaseModel              # Validation des données (Schéma)
+from typing import List                     # Typage des listes
+import streamlit as st                      # Interface de monitoring Cloud
+import os                                   # Interaction système
 
-# --- FRAMEWORK ET LOGIQUE API ---
-from fastapi import FastAPI, HTTPException  # FastAPI : Cœur du framework pour créer les routes (endpoints).
-                                            # HTTPException : Gère les réponses d'erreur propres (ex: 404 Not Found).
+# --- 1. CONFIGURATION DE L'INTERFACE (FRONTEND) ---
+# Ce bloc permet à Streamlit Cloud de valider le "Health Check".
+st.set_page_config(page_title="TrendMovie API Monitor", page_icon="🎬")
+st.title("Serveur TrendMovie API - Statut : En ligne")
+st.success("L'infrastructure Cloud est opérationnelle.")
+st.write("Le moteur FastAPI tourne en arrière-plan pour gérer les requêtes CRUD.")
+st.info ( "**Accès Développeur** : La documentation interactive est ici : [/docs](/docs")                   # Streamlit : Utilisé ici comme interface de monitoring et 'Landing Page'.
 
-# --- VALIDATION ET TYPAGE ---
-from pydantic import BaseModel              # BaseModel : Définit la structure des données (schéma) et les valide.
-from typing import List                     # List : Permet de typer les réponses contenant plusieurs objets (collections).
-
-# --- INFRASTRUCTURE ET SERVEUR ---
-import uvicorn                              # Uvicorn : Serveur ASGI haute performance pour exécuter l'API.
-import os                                   # os : Permet d'interagir avec le système (ex: récupérer le PORT du Cloud).
-
-# --- INTERFACE DE MONITORING ---
-import streamlit as st                      # Streamlit : Utilisé ici comme interface de monitoring et 'Landing Page'.
-
-# 1. --- MODÈLE DE DONNÉES (Pydantic) ---
+# 2. --- MODÈLE DE DONNÉES (Pydantic) ---
 # Ce modèle définit la structure d'un objet "Film". 
 # FastAPI l'utilise pour vérifier que les données envoyées par les utilisateurs sont correctes.
 class Movie(BaseModel):
@@ -138,8 +136,3 @@ async def delete_movie(movie_id: int):
             return {"OK": True} # Confirmation de suppression
     raise HTTPException(status_code=404, detail=f"Aucun film avec l'identifiant {movie_id} n'existe")
 
-if __name__ == "__main__": 
-    # Configuration dynamique du port pour le déploiement Cloud 
-    port = int(os.environ.get("PORT", 8000)) 
-    # Lancement du serveur ASGI Uvicorn 
-    uvicorn.run(app, host="0.0.0.0", port=port) 
