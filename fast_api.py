@@ -11,11 +11,21 @@
 # **************************************************************************** ```
 
 
-from fastapi import FastAPI, HTTPException  # FastAPI pour l'API, HTTPException pour les erreurs (404, etc.)
-from pydantic import BaseModel              # Pour définir le schéma des données (Data Validation)
-from typing import List                     # Pour définir des listes typées dans les réponses
-import uvicorn  
-import os 
+# --- FRAMEWORK ET LOGIQUE API ---
+from fastapi import FastAPI, HTTPException  # FastAPI : Cœur du framework pour créer les routes (endpoints).
+                                            # HTTPException : Gère les réponses d'erreur propres (ex: 404 Not Found).
+
+# --- VALIDATION ET TYPAGE ---
+from pydantic import BaseModel              # BaseModel : Définit la structure des données (schéma) et les valide.
+from typing import List                     # List : Permet de typer les réponses contenant plusieurs objets (collections).
+
+# --- INFRASTRUCTURE ET SERVEUR ---
+import uvicorn                              # Uvicorn : Serveur ASGI haute performance pour exécuter l'API.
+import os                                   # os : Permet d'interagir avec le système (ex: récupérer le PORT du Cloud).
+
+# --- INTERFACE DE MONITORING ---
+import streamlit as st                      # Streamlit : Utilisé ici comme interface de monitoring et 'Landing Page'.
+
 # 1. --- MODÈLE DE DONNÉES (Pydantic) ---
 # Ce modèle définit la structure d'un objet "Film". 
 # FastAPI l'utilise pour vérifier que les données envoyées par les utilisateurs sont correctes.
@@ -31,6 +41,19 @@ class Movie(BaseModel):
 # Initialisation de l'application FastAPI
 # C'est l'objet "app" qui recevra toutes les requêtes HTTP.
 app = FastAPI(title="TrendMovieAPI 2026")
+
+# --- INTERFACE DE MONITORING (FRONTEND) ---
+st.set_page_config(page_title="TrendMovie API Monitor", page_icon="🎬")
+st.title(" Serveur TrendMovie API - Statut : En ligne")
+st.write("L'infrastructure Cloud a validé le déploiement du service Backend.")
+st.info(" **Accès Développeur** : La documentation interactive Swagger est disponible ici : [/docs](/docs)")
+
+# --- MOTEUR API (BACKEND) ---
+app = FastAPI(title="TrendMovie API")
+
+@app.get("/")
+def read_root():
+    return {"status": "API is running", "monitoring_ui": "active"}
 
 # 2. --- BASE DE DONNÉES SIMULÉE ---
 # Utilisation d'une liste Python (In-Memory Storage) pour stocker nos 20 films.
